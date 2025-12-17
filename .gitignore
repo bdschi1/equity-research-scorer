@@ -1,0 +1,46 @@
+# ===========================
+# 🔐 SECURITY & PRIVACY (CRITICAL)
+# ===========================
+.env
+.env.local
+banned_entities.json
+secrets.yaml
+notes.txt
+
+# ===========================
+# 🐍 PYTHON BASICS
+# ===========================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ===========================
+# 📂 DATA & ARTIFACTS
+# ===========================
+# Ignore actual PDFs and JSON results to keep repo light
+data/raw_pdfs/*
+data/processed/*
+
+# ...but keep the folder structure for others
+!data/raw_pdfs/.gitkeep
+!data/processed/.gitkeep
+
+# ===========================
+# 💻 IDE & SYSTEM SETTINGS
+# ===========================
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# ===========================
+# 📊 STREAMLIT
+# ===========================
+.streamlit/secrets.toml

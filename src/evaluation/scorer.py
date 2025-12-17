@@ -3,9 +3,9 @@ import json
 from openai import OpenAI
 from pydantic import BaseModel, Field
 from typing import List, Optional
+from src.prompts.manager import PromptManager  # <--- NEW IMPORT
 
 # --- 1. ROBUST DATA STRUCTURES ---
-
 class DimensionScore(BaseModel):
     score: int = Field(..., description="Integer score from 1-5")
     reasoning: str = Field(..., description="Justification for the score")
@@ -13,11 +13,7 @@ class DimensionScore(BaseModel):
     red_flags: List[str] = Field(default=[], description="Bullet points of specific concerns")
 
 class PMPerspective(BaseModel):
-    """The 'Senior PM' style assessment."""
-    
-    # NEW: The Variant View
-    variant_view: str = Field(..., description="A non-obvious, second-level insight. If the author says 'X', look for the hidden driver 'Y'. What is the market missing?")
-    
+    variant_view: str = Field(..., description="A non-obvious, second-level insight.")
     bear_case: str = Field(..., description="The smartest counter-argument (Bear Thesis).")
     catalyst_timing: str = Field(..., description="Specific dates/events mentioned.")
     pre_mortem: str = Field(..., description="Specific failure condition.")
@@ -27,36 +23,24 @@ class PMPerspective(BaseModel):
 class ScoreResponse(BaseModel):
     verdict: str = Field(..., description="STRONG, WEAK, or NEUTRAL")
     confidence_score: int = Field(..., description="0-100% confidence based on text availability.")
-    
     thesis_logic: DimensionScore
     catalyst_quality: DimensionScore
     risk_analysis: DimensionScore
     professional_standards: DimensionScore
-    
     pm_perspective: PMPerspective
     improvement_plan: List[str]
 
 # --- 2. THE SCORER ENGINE ---
-
 class EquityScorer:
     def __init__(self):
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        self.prompts = PromptManager()  # <--- Initialize Manager
 
     def evaluate(self, text: str, filename: str) -> Optional[dict]:
         truncated_text = text[:50000]
 
-        system_prompt = """
-        You are a Senior Portfolio Manager. Grade this research.
-        
-        ROBUSTNESS RULES:
-        1. EVIDENCE REQUIRED: Quote the text for every dimension score.
-        2. BE CRITICAL: Reserve 5/5 for truly differentiated work.
-        
-        THE VARIANT VIEW (Crucial):
-        - Do not just repeat the thesis. 
-        - Look for "Second-Order Effects" or "Hidden Risks/Drivers". 
-        - Example: If thesis is "Buy Retailer X for growth", Variant View might be "Real Estate value underpins downside."
-        """
+        # <--- LOAD FROM YAML INSTEAD OF HARDCODING
+        system_prompt = self.prompts.get_prompt("equity_scorer_system")
 
         try:
             completion = self.client.beta.chat.completions.parse(
@@ -78,7 +62,6 @@ class EquityScorer:
                 (result['professional_standards']['score'] * 0.2)
             )
             result['overall_score'] = round(math_score, 1)
-            
             return result
 
         except Exception as e:

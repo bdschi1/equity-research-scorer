@@ -38,7 +38,7 @@ Instead of generic summaries, the AI mimics a Senior Portfolio Manager:
 
 1.  **Clone the Repo**
     ```bash
-    git clone [https://github.com/yourusername/equity-research-scorer.git](https://github.com/yourusername/equity-research-scorer.git)
+    git clone [https://github.com/bdschi1/equity-research-scorer.git](https://github.com/bdschi1/equity-research-scorer.git)
     cd equity-research-scorer
     ```
 
